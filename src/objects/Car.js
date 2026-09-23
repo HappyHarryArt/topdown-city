@@ -76,8 +76,23 @@ export default class Car extends Phaser.Physics.Arcade.Sprite {
     this.body.setSize(length * cos + breadth * sin, length * sin + breadth * cos, true);
   }
 
+  // Setzt das Auto an eine neue Stelle, fahrend in Blickrichtung
+  respawn(x, y, rotation, speed) {
+    this.rotation = rotation;
+    this.fitBody();
+    this.body.reset(x, y);
+    this.speed = speed;
+    this.heading.setToPolar(rotation, 1);
+    this.motion.set(this.heading.x * speed, this.heading.y * speed);
+    this.skipImpact = true; // Kollision von vorher nicht noch einmal auswerten
+  }
+
   // Wertet Kollisionen aus dem letzten Physikschritt aus
   handleImpact() {
+    if (this.skipImpact) {
+      this.skipImpact = false;
+      return;
+    }
     const { touching, blocked } = this.body;
     const nx = (touching.right || blocked.right ? 1 : 0) - (touching.left || blocked.left ? 1 : 0);
     const ny = (touching.down || blocked.down ? 1 : 0) - (touching.up || blocked.up ? 1 : 0);
